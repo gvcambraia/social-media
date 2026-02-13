@@ -20,7 +20,7 @@ export async function Feed() {
   });
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='flex flex-col w-full gap-4'>
       {posts.length === 0 ? (
         <p className='text-muted-foreground'>No posts yet</p>
       ) : (
