@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma';
-import { FeedItem } from './FeedItem';
+import { FeedList } from './FeedList';
 
 export async function Feed() {
   const posts = await prisma.post.findMany({
@@ -33,13 +33,5 @@ export async function Feed() {
     },
   });
 
-  return (
-    <div className='flex flex-col w-full gap-4'>
-      {posts.length === 0 ? (
-        <p className='text-muted-foreground'>No posts yet</p>
-      ) : (
-        posts.map((post) => <FeedItem key={post.id} post={post} />)
-      )}
-    </div>
-  );
+  return <FeedList posts={posts} />;
 }
