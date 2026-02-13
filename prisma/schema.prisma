@@ -18,6 +18,9 @@ model Post {
   content          String   @db.VarChar(777)  
   author_id        Int
   author           User     @relation(fields: [author_id], references: [id])
+  original_post_id Int?
+  original_post    Post?    @relation("Reposts", fields: [original_post_id], references: [id], onDelete: Cascade)
+  reposts          Post[]   @relation("Reposts")
   created_at       DateTime @default(now())
   
   @@index([created_at(sort: Desc)])
