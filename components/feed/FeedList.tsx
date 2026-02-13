@@ -23,6 +23,9 @@ type Post = {
       username: string;
     };
   } | null;
+  reposts: {
+    author_id: number;
+  }[];
 };
 
 type FeedListProps = {

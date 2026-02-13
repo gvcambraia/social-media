@@ -21,6 +21,17 @@ export async function repostPost(authorId: number, originalPostId: number) {
     throw new Error('Cannot repost a repost');
   }
 
+  const existingRepost = await prisma.post.findFirst({
+    where: {
+      author_id: authorId,
+      original_post_id: originalPostId,
+    },
+  });
+
+  if (existingRepost) {
+    throw new Error('You have already reposted this post');
+  }
+
   await prisma.post.create({
     data: {
       content: originalPost.content,
@@ -56,6 +67,11 @@ export async function loadMorePosts(skip: number) {
               username: true,
             },
           },
+        },
+      },
+      reposts: {
+        select: {
+          author_id: true,
         },
       },
     },
