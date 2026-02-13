@@ -31,7 +31,8 @@ export async function Feed() {
     orderBy: {
       created_at: 'desc',
     },
+    take: 15,
   });
 
-  return <FeedList posts={posts} />;
+  return <FeedList initialPosts={posts} />;
 }
