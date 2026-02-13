@@ -7,10 +7,24 @@ export async function Feed() {
       id: true,
       content: true,
       created_at: true,
+      original_post_id: true,
       author: {
         select: {
           id: true,
           username: true,
+        },
+      },
+      original_post: {
+        select: {
+          id: true,
+          content: true,
+          created_at: true,
+          author: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
         },
       },
     },
