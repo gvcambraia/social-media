@@ -83,6 +83,7 @@ export const PostScalarFieldEnum = {
   id: 'id',
   content: 'content',
   author_id: 'author_id',
+  original_post_id: 'original_post_id',
   created_at: 'created_at'
 } as const
 
@@ -103,4 +104,12 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

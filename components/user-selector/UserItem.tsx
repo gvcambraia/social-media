@@ -12,8 +12,16 @@ import {
 
 export function UserItem({ users }: { users: User[] }) {
   const auth = useAuth();
+
+  const handleValueChange = (username: string) => {
+    const user = users.find((u) => u.username === username);
+    if (user) {
+      auth.setCurrentUser(user);
+    }
+  };
+
   return (
-    <Select>
+    <Select onValueChange={handleValueChange}>
       <SelectTrigger className='w-full max-w-48'>
         <SelectValue
           placeholder={auth.currentUser?.username ?? 'Select User'}
@@ -22,11 +30,7 @@ export function UserItem({ users }: { users: User[] }) {
       <SelectContent>
         <SelectGroup>
           {users.map((user) => (
-            <SelectItem
-              key={user.id}
-              value={user.username}
-              onChange={() => auth.setCurrentUser(user)}
-            >
+            <SelectItem key={user.id} value={user.username}>
               {user.username}
             </SelectItem>
           ))}
