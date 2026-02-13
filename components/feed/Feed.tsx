@@ -27,6 +27,11 @@ export async function Feed() {
           },
         },
       },
+      reposts: {
+        select: {
+          author_id: true,
+        },
+      },
     },
     orderBy: {
       created_at: 'desc',
