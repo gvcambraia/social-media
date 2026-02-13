@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Input } from '../ui/input';
-import { loadMorePosts } from './actions';
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
+import { loadInitialPosts, loadMorePosts } from './actions';
 import { FeedItem } from './FeedItem';
 
 type Post = {
@@ -34,39 +35,48 @@ type FeedListProps = {
 
 export function FeedList({ initialPosts }: FeedListProps) {
   const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<'latest' | 'trending'>('latest');
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length === 15);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const loadPosts = async () => {
+      setIsLoading(true);
+      try {
+        const newPosts = await loadInitialPosts(sortBy);
+        setPosts(newPosts);
+        setHasMore(newPosts.length === 15);
+      } catch (error) {
+        console.error('Failed to load posts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPosts();
+  }, [sortBy]);
+
   const filteredPosts = posts.filter((post) => {
     if (!search.trim()) return true;
 
-    const searchLower = search.toLowerCase();
-    const contentMatch = post.content.toLowerCase().includes(searchLower);
-    const authorMatch = post.author.username
-      .toLowerCase()
-      .includes(searchLower);
-    const originalContentMatch =
-      post.original_post?.content.toLowerCase().includes(searchLower) ?? false;
-    const originalAuthorMatch =
-      post.original_post?.author.username.toLowerCase().includes(searchLower) ??
-      false;
+    if (post.original_post_id !== null) return false;
 
-    return (
-      contentMatch || authorMatch || originalContentMatch || originalAuthorMatch
-    );
+    const searchValue = search.trim();
+    const contentMatch = post.content === searchValue;
+
+    return contentMatch;
   });
 
   useEffect(() => {
-    if (!hasMore || isLoading) return;
+    if (!hasMore || isLoading || search.trim()) return;
 
     const observer = new IntersectionObserver(
       async (entries) => {
         if (entries[0].isIntersecting) {
           setIsLoading(true);
           try {
-            const newPosts = await loadMorePosts(posts.length);
+            const newPosts = await loadMorePosts(posts.length, sortBy);
             if (newPosts.length < 20) {
               setHasMore(false);
             }
@@ -91,17 +101,34 @@ export function FeedList({ initialPosts }: FeedListProps) {
         observer.unobserve(currentRef);
       }
     };
-  }, [hasMore, isLoading, posts.length]);
+  }, [hasMore, isLoading, posts.length, sortBy, search]);
 
   return (
     <div className='flex flex-col w-full gap-4'>
-      <Input
-        type='text'
-        placeholder='Search posts...'
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className='w-full'
-      />
+      <div className='flex flex-col gap-2'>
+        <Input
+          type='text'
+          placeholder='Search posts (exact match)...'
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className='w-full'
+        />
+        <ToggleGroup
+          type='single'
+          value={sortBy}
+          onValueChange={(value) => {
+            if (value) setSortBy(value as 'latest' | 'trending');
+          }}
+          className='justify-start'
+        >
+          <ToggleGroupItem value='latest' aria-label='Sort by latest'>
+            Latest
+          </ToggleGroupItem>
+          <ToggleGroupItem value='trending' aria-label='Sort by trending'>
+            Trending
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
       {filteredPosts.length === 0 ? (
         <p className='text-muted-foreground'>
           {search.trim() ? 'No posts found' : 'No posts yet'}
