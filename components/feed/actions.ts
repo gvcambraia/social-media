@@ -31,3 +31,40 @@ export async function repostPost(authorId: number, originalPostId: number) {
 
   revalidatePath('/');
 }
+
+export async function loadMorePosts(skip: number) {
+  const posts = await prisma.post.findMany({
+    select: {
+      id: true,
+      content: true,
+      created_at: true,
+      original_post_id: true,
+      author: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+      original_post: {
+        select: {
+          id: true,
+          content: true,
+          created_at: true,
+          author: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      created_at: 'desc',
+    },
+    skip,
+    take: 20,
+  });
+
+  return posts;
+}
